@@ -1,0 +1,14 @@
+[Unit]
+Description=voidfs
+After=network.target
+
+[Service]
+Type=simple
+User=voidfs
+ExecStart=/srv/voidfs/voidfs
+Restart=on-failure
+Environment="VOIDFS_ADDR=127.0.0.1:21334"
+Environment="VOIDFS_REPO=/srv/voidfs/xlocate.git"
+
+[Install]
+WantedBy=multi-user.target

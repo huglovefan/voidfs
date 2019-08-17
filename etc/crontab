@@ -1,0 +1,7 @@
+# crontab -u voidfs -e
+
+# xlocate updates at 06:00 UTC and finishes in ~3 minutes according to git log
+# convert this to the local timezone and add a few minutes to let it finish
+
+# 10 9 = 09:10 local time
+10 9 * * * /bin/sh /srv/voidfs/update.sh
