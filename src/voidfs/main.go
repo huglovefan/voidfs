@@ -26,10 +26,11 @@ func init() {
 }
 
 func splitPath(path string) []string {
-	names := []string{}
-	for _, name := range strings.Split(path, "/") {
-		if name != "" {
-			names = append(names, name)
+	names := strings.Split(strings.TrimPrefix(path, "/"), "/")
+	for i := 0; i < len(names); i++ {
+		if names[i] == "" {
+			names = append(names[:i], names[i+1:]...)
+			i--
 		}
 	}
 	return names
