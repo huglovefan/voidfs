@@ -316,5 +316,5 @@ func main() {
 		addr = "127.0.0.1:8080"
 	}
 	fmt.Println("listening on", addr)
-	http.ListenAndServe(addr, nil)
+	log.Fatal(http.ListenAndServe(addr, nil))
 }
