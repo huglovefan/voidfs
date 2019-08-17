@@ -1,0 +1,12 @@
+browsable listing of every file in xlocate
+
+usage:
+- run ./build.sh && ./voidfs
+
+notes:
+- needs about ~1.1g of ram on x86_64 when built with "GOARCH=386"
+- send a SIGHUP to re-read the file list from disk
+
+environment variables:
+- VOIDFS_ADDR: address and port to listen on (default: "127.0.0.1:8080")
+- VOIDFS_REPO: path to xlocate repository (default: "$HOME/.cache/xlocate.git")
