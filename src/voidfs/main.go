@@ -143,7 +143,7 @@ func print_children(w http.ResponseWriter, xd *xldb.Xldb, vfs *xldb.Vfs) {
 	})
 	sp := strings.Repeat(" ", longest_vlen+2)
 	for _, entry := range entries {
-		fmt.Fprintf(w, `<a href="%s%s">%s%s</a>%s%s%s`,
+		fmt.Fprintf(w, `<a href="./%s%s">%s%s</a>%s%s%s`,
 			entry.name_uh,
 			entry.dirslash,
 			entry.name_h,
