@@ -36,10 +36,9 @@ func splitPath(path string) []string {
 	return names
 }
 
-func print_header(w http.ResponseWriter, xd *xldb.Xldb, vfs *xldb.Vfs) {
+func print_header(w http.ResponseWriter, xd *xldb.Xldb, vfs *xldb.Vfs, abspath string) {
 	fmt.Fprintf(w, `<a href="/">/</a>`)
-	abspath := xd.VfsGetPath(vfs)
-	pathLen := len(abspath + " is a ")
+	pathLen := len(abspath) + len(" is a ")
 	components := splitPath(abspath)
 	p := ""
 	for i, name := range components {
@@ -159,8 +158,9 @@ type owner_entry struct {
 	typestr string
 }
 
-func print_owners(w http.ResponseWriter, xd *xldb.Xldb, vfs *xldb.Vfs) {
+func print_owner_info(w http.ResponseWriter, xd *xldb.Xldb, vfs *xldb.Vfs, real_path string) {
 	owners := make([]owner_entry, len(xd.VfsGetOwners(vfs)))
+	is_file := false
 	longest_owner := 0
 	i := 0
 	for pkgver, vtype := range xd.VfsGetOwners(vfs) {
@@ -171,6 +171,7 @@ func print_owners(w http.ResponseWriter, xd *xldb.Xldb, vfs *xldb.Vfs) {
 			owner.typestr = "dir"
 		case xldb.XLDB_FILE:
 			owner.typestr = "file"
+			is_file = true
 		default:
 			if tgt := xd.VfsLinkResolveTarget(vfs, vtype.GetTarget()); tgt != nil {
 				urlpath := xd.VfsGetPathUrlencoded(tgt)
@@ -191,6 +192,18 @@ func print_owners(w http.ResponseWriter, xd *xldb.Xldb, vfs *xldb.Vfs) {
 	sort.Slice(owners, func(i1, i2 int) bool {
 		return owners[i1].pkgver < owners[i2].pkgver
 	})
+	if is_file {
+		path := html.EscapeString(shellquote(real_path))
+		for _, entry := range owners {
+			if entry.typestr != "file" {
+				continue
+			}
+			fmt.Fprintf(w, "%% xbps-query -R %s --cat=%s\n",
+				entry.pkgver,
+				path)
+		}
+		fmt.Fprintf(w, "\n")
+	}
 	sp := strings.Repeat(" ", longest_owner+2)
 	for i, entry := range owners {
 		newline := ""
@@ -294,20 +307,22 @@ func main() {
 			dirslash = "/"
 		}
 
+		real_path := xd.VfsGetPath(vfs)
+
 		fmt.Fprintf(w, `<!doctype html>`)
 		fmt.Fprintf(w, `<title>voidfs:%s%s</title>`,
-			html.EscapeString(xd.VfsGetPath(vfs)),
+			html.EscapeString(real_path),
 			dirslash)
 		fmt.Fprintf(w, `<pre style="cursor: default; margin: 0;">`)
 
-		print_header(w, &xd, vfs)
+		print_header(w, &xd, vfs, real_path)
 
 		if len(*vfs) != 0 {
 			print_children(w, &xd, vfs)
 			fmt.Fprintf(w, "\n")
 		}
 
-		print_owners(w, &xd, vfs)
+		print_owner_info(w, &xd, vfs, real_path)
 
 		fmt.Fprintf(w, `</pre>`)
 	})
